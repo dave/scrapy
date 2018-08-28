@@ -1,4 +1,4 @@
-# simulation.Getter
+# simgetter.Getter
 
 ### Create mode
 * Gets using an http.Getter
