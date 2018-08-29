@@ -11,36 +11,68 @@ type Parser struct {
 	Include func(*url.URL) bool
 }
 
-func (p *Parser) Parse(body io.Reader) (urls []string, errs []error) {
+func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []error) {
 	t := html.NewTokenizer(body)
+
+	page, err := url.Parse(urlPage)
+	if err != nil {
+		return nil, []error{err}
+	}
+
 	for {
 		typ := t.Next()
 		switch typ {
 		case html.ErrorToken:
+
+			// End of document
 			if t.Err() == io.EOF {
-				// end of document
 				return
 			}
-			// parser error - log
+
+			// Log a parser error
 			errs = append(errs, t.Err())
+			continue
+
 		case html.StartTagToken:
 			tok := t.Token()
+
+			// Look for a tags. TODO: Look for more tags?
 			if tok.Data != "a" {
 				continue
 			}
+
 			for _, att := range tok.Attr {
+
+				// Look for href attributes. TODO: Look for more attributes?
 				if att.Key != "href" {
 					continue
 				}
+
 				u, err := url.Parse(att.Val)
 				if err != nil {
 					errs = append(errs, err)
-					continue
+					break
 				}
+
+				// Add scheme and host from page for relative URLs
+				if u.Scheme == "" {
+					u.Scheme = page.Scheme
+				}
+				if u.Host == "" {
+					u.Host = page.Host
+				}
+
+				// Clear path fragment to reduce duplication
+				u.Fragment = ""
+
+				// Run the include function if it exists and skip this url if needed
 				if p.Include != nil && !p.Include(u) {
-					continue
+					break
 				}
-				urls = append(urls, att.Val)
+
+				// Stop scanning attributes once we've found a url
+				urls = append(urls, u.String())
+				break
 			}
 		}
 	}
