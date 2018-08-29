@@ -4,6 +4,10 @@ import (
 	"io"
 	"net/url"
 
+	"path"
+
+	"strings"
+
 	"golang.org/x/net/html"
 )
 
@@ -48,6 +52,11 @@ func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []er
 					continue
 				}
 
+				// Let's throw away a common error
+				if strings.HasPrefix(att.Val, "tel:") {
+					break
+				}
+
 				u, err := url.Parse(att.Val)
 				if err != nil {
 					errs = append(errs, err)
@@ -60,6 +69,10 @@ func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []er
 				}
 				if u.Host == "" {
 					u.Host = page.Host
+				}
+				// Handle relative paths - e.g. "../foo/bar.html"
+				if !path.IsAbs(u.Path) {
+					u.Path = path.Join(page.Path, u.Path)
 				}
 
 				// Clear path fragment to reduce duplication
