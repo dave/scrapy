@@ -1,32 +1,38 @@
 package mockqueuer
 
-import "context"
+import (
+	"context"
+	"sync"
+)
 
 // Mock queuer executes the action as soon as the url is pushed
 
 type Queuer struct {
-	action func(ctx context.Context, url string)
+	action func(url string)
 	urls   map[string]bool
 	ctx    context.Context
+	once   sync.Once
 }
 
-func (q *Queuer) Push(url string) {
-	if q.urls == nil {
+func (q *Queuer) Start(action func(url string)) {
+	q.once.Do(func() {
 		q.urls = map[string]bool{}
-	}
-	if q.urls[url] {
-		return
-	}
-	q.urls[url] = true
-	q.action(q.ctx, url)
-}
-
-func (q *Queuer) Action(action func(ctx context.Context, url string)) {
+	})
 	q.action = action
 }
 
-func (q *Queuer) Start(ctx context.Context) {
-	q.ctx = ctx
+func (q *Queuer) Push(url string) (bool, error) {
+	if q.urls == nil {
+		panic("Start must be called before Push")
+	}
+	if q.urls[url] {
+		return false, nil
+	}
+	q.urls[url] = true
+	q.action(url)
+	return true, nil
 }
 
-func (*Queuer) Wait() {}
+func (*Queuer) Wait() {
+	// no-op
+}
