@@ -3,14 +3,13 @@ package webgetter
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sort"
 	"strings"
 	"testing"
 	"time"
-
-	"io/ioutil"
 
 	"github.com/dave/scrapy/scraper/getter"
 )
@@ -84,15 +83,18 @@ func (s testSpec) run(name string, t *testing.T) {
 		t.Fatalf("%s: test took too long", name)
 	}
 
-	defer r.Body.Close()
-
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		t.Errorf("%s: error reading body: %v", name, err)
+	var body string
+	if r.Body != nil {
+		defer r.Body.Close()
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("%s: error reading body: %v", name, err)
+		}
+		body = string(b)
 	}
 
-	if string(b) != s.body {
-		t.Errorf("%s: expected body %q, got %q", name, s.body, r.Body)
+	if body != s.body {
+		t.Errorf("%s: expected body %q, got %q", name, s.body, body)
 	}
 
 	if r.Code != s.code {
