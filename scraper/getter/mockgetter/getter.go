@@ -1,12 +1,10 @@
 package mockgetter
 
 import (
-	"context"
-
-	"time"
-
 	"bytes"
+	"context"
 	"io/ioutil"
+	"time"
 
 	"github.com/dave/scrapy/scraper/getter"
 )

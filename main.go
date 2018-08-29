@@ -1,16 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"net/url"
-
-	"context"
-
 	"time"
 
 	"github.com/dave/scrapy/scraper"

@@ -1,12 +1,10 @@
 package scraper
 
 import (
+	"context"
+	"reflect"
 	"testing"
 	"time"
-
-	"context"
-
-	"reflect"
 
 	"github.com/dave/scrapy/scraper/getter/mockgetter"
 	"github.com/dave/scrapy/scraper/logger/mocklogger"

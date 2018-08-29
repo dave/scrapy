@@ -3,11 +3,10 @@ package consolelogger
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"strings"
 
 	"github.com/buger/goterm"
 )

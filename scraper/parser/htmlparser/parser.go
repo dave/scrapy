@@ -3,9 +3,7 @@ package htmlparser
 import (
 	"io"
 	"net/url"
-
 	"path"
-
 	"strings"
 
 	"golang.org/x/net/html"
