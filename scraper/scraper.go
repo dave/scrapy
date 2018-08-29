@@ -58,11 +58,6 @@ func (s *State) Start(ctx context.Context, url string) {
 			return
 		}
 
-		if !strings.Contains(mime, "text/html") {
-			s.Logger.Error(url, fmt.Errorf("unsupported mime type: %s", mime))
-			return
-		}
-
 		// Close body if it is non nil
 		if body != nil {
 			defer body.Close()
@@ -71,6 +66,11 @@ func (s *State) Start(ctx context.Context, url string) {
 		// Don't continue if the code is not 200
 		if code != 200 {
 			s.Logger.Finish(url, code, time.Now().Sub(start), 0, 0)
+			return
+		}
+
+		if !strings.Contains(mime, "text/html") {
+			s.Logger.Error(url, fmt.Errorf("unsupported mime type: %s", mime))
 			return
 		}
 
@@ -99,11 +99,8 @@ func (s *State) Start(ctx context.Context, url string) {
 		}
 	})
 
-	if added, err := s.Queuer.Push(url); err != nil {
-		s.Logger.Full(url)
-	} else if added {
-		s.Logger.Queue(url)
-	}
+	s.Queuer.Push(url)
+	s.Logger.Queue(url) // no need to check error for initial push
 
 	s.Queuer.Wait()
 	s.Logger.Exit()
