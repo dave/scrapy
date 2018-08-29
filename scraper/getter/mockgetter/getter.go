@@ -1,4 +1,4 @@
-package webgetter
+package mockgetter
 
 import (
 	"context"
