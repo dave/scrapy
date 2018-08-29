@@ -19,5 +19,5 @@ func (l *Logger) Error(url string, err error) {
 }
 
 func (l *Logger) Finish(url string, code int, latency time.Duration, errors int) {
-	fmt.Fprintf(l.Writer, "finished %s: code %d in %v with %d error(s)\n", url, code, latency, len(errors))
+	fmt.Fprintf(l.Writer, "finished %s: code %d in %v with %d error(s)\n", url, code, latency, errors)
 }
