@@ -11,6 +11,12 @@ type Logger struct {
 	m   sync.Mutex
 }
 
+func (l *Logger) Queue(url string) {
+	l.m.Lock()
+	defer l.m.Unlock()
+	l.Log = append(l.Log, fmt.Sprintf("queue %s", url))
+}
+
 func (l *Logger) Start(url string) {
 	l.m.Lock()
 	defer l.m.Unlock()
@@ -28,3 +34,5 @@ func (l *Logger) Finish(url string, code int, latency time.Duration, urls, error
 	defer l.m.Unlock()
 	l.Log = append(l.Log, fmt.Sprintf("finish %s: %d, %d, %d", url, code, urls, errors))
 }
+func (l *Logger) Init() {}
+func (l *Logger) Exit() {}
