@@ -4,15 +4,58 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
+
+	"net/url"
+
+	"context"
+
+	"time"
 
 	"github.com/dave/scrapy/scraper"
+	"github.com/dave/scrapy/scraper/getter/webgetter"
+	"github.com/dave/scrapy/scraper/logger/consolelogger"
+	"github.com/dave/scrapy/scraper/parser/htmlparser"
+	"github.com/dave/scrapy/scraper/queuer/concurrentqueuer"
 )
 
 func main() {
+
 	flag.Parse()
-	s := scraper.New()
-	if err := s.Start(flag.Arg(0)); err != nil {
+	arg := flag.Arg(0)
+	if arg == "" {
+		arg = "https://www.monzo.com/"
+	}
+
+	base, err := url.Parse(arg)
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		// Set up graceful shutdown
+		stop := make(chan os.Signal, 1)
+		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+		// Wait for shutdown signal
+		<-stop
+
+		// Call the context cancellation function
+		cancel()
+	}()
+
+	s := &scraper.State{
+		Timeout: time.Second * 10,
+		Getter:  &webgetter.Getter{},
+		Parser: &htmlparser.Parser{
+			Include: func(u *url.URL) bool { return u != nil && u.Host == base.Host },
+		},
+		Queuer: &concurrentqueuer.Queuer{Length: 10000, Workers: 3},
+		Logger: &consolelogger.Logger{},
+	}
+
+	s.Start(ctx, base.String())
 }
