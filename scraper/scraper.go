@@ -2,7 +2,9 @@ package scraper
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/dave/scrapy/scraper/getter"
@@ -38,6 +40,7 @@ func (s *State) Start(ctx context.Context, url string) {
 		var body io.ReadCloser
 		var code int
 		var err error
+		var mime string
 		select {
 		case <-ctx.Done():
 			s.Logger.Error(url, ctx.Err())
@@ -46,11 +49,17 @@ func (s *State) Start(ctx context.Context, url string) {
 			err = r.Err
 			body = r.Body
 			code = r.Code
+			mime = r.Mime
 		}
 
 		// Log error
 		if err != nil {
 			s.Logger.Error(url, err)
+			return
+		}
+
+		if !strings.Contains(mime, "text/html") {
+			s.Logger.Error(url, fmt.Errorf("unsupported mime type: %s", mime))
 			return
 		}
 
@@ -83,7 +92,7 @@ func (s *State) Start(ctx context.Context, url string) {
 		// Queue all the resulting urls
 		for _, u := range urls {
 			if added, err := s.Queuer.Push(u); err != nil {
-				s.Logger.Error(u, err)
+				s.Logger.Full(u)
 			} else if added {
 				s.Logger.Queue(u)
 			}
@@ -91,7 +100,7 @@ func (s *State) Start(ctx context.Context, url string) {
 	})
 
 	if added, err := s.Queuer.Push(url); err != nil {
-		s.Logger.Error(url, err)
+		s.Logger.Full(url)
 	} else if added {
 		s.Logger.Queue(url)
 	}
