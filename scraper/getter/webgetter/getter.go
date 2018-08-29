@@ -2,7 +2,6 @@ package webgetter
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/dave/scrapy/scraper/getter"
@@ -30,15 +29,9 @@ func (h *Getter) GetPage(ctx context.Context, url string) chan getter.Result {
 			if err != nil {
 				out <- getter.Result{Err: err}
 				return
-			} else {
-				body, err := ioutil.ReadAll(response.Body)
-				if err != nil {
-					out <- getter.Result{Err: err}
-					return
-				}
-				out <- getter.Result{Code: response.StatusCode, Body: body}
-				return
 			}
+			out <- getter.Result{Code: response.StatusCode, Body: response.Body}
+			return
 		}
 	}()
 	return out

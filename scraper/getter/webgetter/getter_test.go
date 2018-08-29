@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"io/ioutil"
+
 	"github.com/dave/scrapy/scraper/getter"
 )
 
@@ -82,7 +84,14 @@ func (s testSpec) run(name string, t *testing.T) {
 		t.Fatalf("%s: test took too long", name)
 	}
 
-	if string(r.Body) != s.body {
+	defer r.Body.Close()
+
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		t.Errorf("%s: error reading body: %v", name, err)
+	}
+
+	if string(b) != s.body {
 		t.Errorf("%s: expected body %q, got %q", name, s.body, r.Body)
 	}
 
