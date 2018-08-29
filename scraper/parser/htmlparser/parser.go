@@ -50,8 +50,13 @@ func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []er
 					continue
 				}
 
-				// Let's throw away a common error
-				if strings.HasPrefix(att.Val, "tel:") {
+				// Let's throw away a common errors
+				if strings.HasPrefix(att.Val, "tel:") || strings.HasPrefix(att.Val, "mailto:") {
+					break
+				}
+
+				// URLs we don't want to get
+				if strings.HasSuffix(att.Val, ".zip") || strings.HasSuffix(att.Val, ".pdf") || strings.HasSuffix(att.Val, ".png") || strings.HasSuffix(att.Val, ".jpg") {
 					break
 				}
 
@@ -71,6 +76,14 @@ func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []er
 				// Handle relative paths - e.g. "../foo/bar.html"
 				if !path.IsAbs(u.Path) {
 					u.Path = path.Join(page.Path, u.Path)
+				}
+				// Normalize URLs to remove trailing slashes
+				if strings.HasSuffix(u.Path, "/") {
+					u.Path = u.Path[:len(u.Path)-1]
+				}
+				// Prevent https page from linking to non-https version?
+				if page.Scheme == "https" && u.Scheme == "http" {
+					u.Scheme = "https"
 				}
 
 				// Clear path fragment to reduce duplication
