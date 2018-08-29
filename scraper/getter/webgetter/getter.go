@@ -11,7 +11,7 @@ type Getter struct {
 	client http.Client
 }
 
-func (h *Getter) GetPage(ctx context.Context, url string) chan getter.Result {
+func (h *Getter) Get(ctx context.Context, url string) chan getter.Result {
 	out := make(chan getter.Result)
 	go func() {
 		defer close(out)

@@ -73,7 +73,7 @@ func (s testSpec) run(name string, t *testing.T) {
 		url = s.overrideUrl
 	}
 
-	c := g.GetPage(ctx, url)
+	c := g.Get(ctx, url)
 
 	var r getter.Result
 	select {
