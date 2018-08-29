@@ -23,8 +23,8 @@ func (l *Logger) Error(url string, err error) {
 	l.Log = append(l.Log, fmt.Sprintf("error %s: %v", url, err))
 }
 
-func (l *Logger) Finish(url string, code int, latency time.Duration, errors int) {
+func (l *Logger) Finish(url string, code int, latency time.Duration, urls, errors int) {
 	l.m.Lock()
 	defer l.m.Unlock()
-	l.Log = append(l.Log, fmt.Sprintf("finish %s: %d, %d", url, code, errors))
+	l.Log = append(l.Log, fmt.Sprintf("finish %s: %d, %d, %d", url, code, urls, errors))
 }
