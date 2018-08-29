@@ -85,8 +85,8 @@ func (s testSpec) run(name string, t *testing.T) {
 
 	var body string
 	if r.Body != nil {
-		defer r.Body.Close()
 		b, err := ioutil.ReadAll(r.Body)
+		r.Body.Close()
 		if err != nil {
 			t.Errorf("%s: error reading body: %v", name, err)
 		}
