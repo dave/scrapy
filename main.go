@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 	arg := flag.Arg(0)
 	if arg == "" {
-		arg = "https://www.monzo.com/"
+		arg = "https://monzo.com/"
 	}
 
 	base, err := url.Parse(arg)
@@ -50,7 +50,7 @@ func main() {
 		Parser: &htmlparser.Parser{
 			Include: func(u *url.URL) bool { return u != nil && u.Host == base.Host },
 		},
-		Queuer: &concurrentqueuer.Queuer{Length: 10000, Workers: 3},
+		Queuer: &concurrentqueuer.Queuer{Length: 1000, Workers: 5},
 		Logger: &consolelogger.Logger{},
 	}
 
