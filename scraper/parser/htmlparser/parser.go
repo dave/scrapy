@@ -11,8 +11,7 @@ type Parser struct {
 	Include func(*url.URL) bool
 }
 
-func (p *Parser) Parse(body io.ReadCloser) (urls []string, errs []error) {
-	defer body.Close()
+func (p *Parser) Parse(body io.Reader) (urls []string, errs []error) {
 	t := html.NewTokenizer(body)
 	for {
 		typ := t.Next()

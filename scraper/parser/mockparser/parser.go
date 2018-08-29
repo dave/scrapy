@@ -15,9 +15,8 @@ type Dummy struct {
 	Errs []string
 }
 
-func (p *Parser) Parse(body io.ReadCloser) (urls []string, errs []error) {
+func (p *Parser) Parse(body io.Reader) (urls []string, errs []error) {
 	b, err := ioutil.ReadAll(body)
-	body.Close()
 	if err != nil {
 		return nil, []error{err}
 	}
