@@ -53,7 +53,7 @@ func (s testSpec) run(name string, t *testing.T) {
 
 	body := ioutil.NopCloser(bytes.NewBufferString(s.body))
 
-	urls, errs := p.Parse(body)
+	urls, errs := p.Parse("", body)
 
 	if !reflect.DeepEqual(urls, s.urls) {
 		t.Errorf("%s: unexpected urls - got: %#v, expected: %#v", name, urls, s.urls)

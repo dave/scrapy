@@ -17,7 +17,7 @@ func TestParser(t *testing.T) {
 			},
 		},
 	}
-	urls, errs := p.Parse(ioutil.NopCloser(bytes.NewBufferString("a")))
+	urls, errs := p.Parse("", ioutil.NopCloser(bytes.NewBufferString("a")))
 	expected := []string{"b"}
 	if !reflect.DeepEqual(urls, expected) {
 		t.Errorf("expected urls: %#v, found %#v", expected, urls)
