@@ -30,7 +30,7 @@ func (h *Getter) Get(ctx context.Context, url string) chan getter.Result {
 				out <- getter.Result{Err: err}
 				return
 			}
-			out <- getter.Result{Code: response.StatusCode, Body: response.Body}
+			out <- getter.Result{Code: response.StatusCode, Body: response.Body, Mime: response.Header.Get("content-type")}
 			return
 		}
 	}()

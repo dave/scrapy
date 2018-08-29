@@ -13,4 +13,5 @@ type Result struct {
 	Code int
 	Body io.ReadCloser
 	Err  error
+	Mime string
 }
