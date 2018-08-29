@@ -5,5 +5,5 @@ import (
 )
 
 type Interface interface {
-	Parse(reader io.Reader) (urls []string, errs []error)
+	Parse(reader io.ReadCloser) (urls []string, errs []error)
 }
