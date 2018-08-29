@@ -34,25 +34,30 @@ func (l *Logger) log() {
 	errs := atomic.LoadUint64(&l.errs)
 	success := atomic.LoadUint64(&l.success)
 	full := atomic.LoadUint64(&l.full)
-	lastErr := l.getErr()
-	lastUrl := l.getLast()
 
-	fmt.Print("\033[H\033[2J")
+	lastUrl := l.getLast()
+	if lastUrl == "" {
+		lastUrl = "n/a"
+	}
+
+	lastErr := l.getErr()
+
+	fmt.Print("\033[H\033[2J") // Clear the screen
 	fmt.Println("Summary")
 	fmt.Println("-------")
+
 	totals := tabwriter.NewWriter(os.Stdout, 2, 2, 2, ' ', 0)
 	fmt.Fprintf(totals, "Queued\t%d\n", queued-started)
 	fmt.Fprintf(totals, "In progress\t%d\n", started-success-errs)
-	fmt.Fprintf(totals, "Success\t%d\n", success)
-	fmt.Fprintf(totals, "Errors\t%d\n", errs)
 	if lastUrl != "" {
-		fmt.Fprintf(totals, "Last url\t%s\n", lastUrl)
-	}
-	if full > 0 {
-		fmt.Fprintf(totals, "Queue was full\t%d\n", full)
+		fmt.Fprintf(totals, "Success\t%d\t%s\n", success, lastUrl)
+	} else {
+		fmt.Fprintf(totals, "Success\t%d\n", success)
 	}
 	if lastErr != "" {
-		fmt.Fprintf(totals, "Last error\t%s\n", lastErr)
+		fmt.Fprintf(totals, "Errors\t%d\t%s\n", errs+full, lastErr)
+	} else {
+		fmt.Fprintf(totals, "Errors\t%d\n", errs+full)
 	}
 	totals.Flush()
 
