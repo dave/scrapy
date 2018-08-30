@@ -44,3 +44,52 @@ This scraper can also be used as a library. See the [scraper](https://godoc.org/
 ### Notes
 
 See [here](https://github.com/dave/scrapy/blob/master/NOTES.md) for design notes and brainstorming.
+
+### Example output
+
+```
+Summary
+-------
+Queued        46
+In progress   5   https://monzo.com/blog/2018/08/30/manage-your-bills
+Success       22
+Errors        0   
+
+Latency
+-------
+   0 - 100  ***
+ 100 - 200 
+ 200 - 300 
+ 300 - 400  **************************
+ 400 - 500  ******************************
+ 500 - 600  ***************
+ 600 - 700  ***
+ 700 - 800  ***
+ 800 - 900 
+ 900 - 1000
+1000 - 1100
+1100 - 1200
+1200 - 1300
+1300 - 1400
+1400 - 1500
+1500 - 1600
+1600 - 1700
+1700 - 1800
+1800 - 1900
+1900 - 2000
+2000+ 
+
+URLs
+----
+https://monzo.com
+https://monzo.com/-play-store-redirect
+https://monzo.com/about
+https://monzo.com/blog
+https://monzo.com/blog/2018/07/02/publishing-our-2018-annual-report
+https://monzo.com/blog/2018/07/10/making-quarterly-goals-public
+https://monzo.com/blog/2018/07/25/monzo-reliability-report
+https://monzo.com/blog/how-money-works
+https://monzo.com/blog/latest
+
+...
+```
