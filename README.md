@@ -16,12 +16,28 @@ go get -u github.com/dave/scrapy
 scrapy [url]
 ```
 
-The `scrapy` command will get get the page at [url], parse it for links and get all pages that are 
+The `scrapy` command will get get the page at `url`, parse it for links and get all pages that are 
 on the same domain.
+
+### Flags
+
+Several command line flags are available:
+
+```
+  -length int
+    	Length of the queue (default 1000)
+  -timeout int
+    	Request timeout in ms (default 10000)
+  -url string
+    	The start page (default "https://monzo.com")
+  -workers int
+    	Number of concurrent workers (default 5)
+```
 
 ### Library
 
 This scraper can also be used as a library. See the [scraper](https://godoc.org/github.com/dave/scrapy/scraper) package.
 
 ### Notes
+
 See [here](https://github.com/dave/scrapy/blob/master/NOTES.md) for design notes and brainstorming.

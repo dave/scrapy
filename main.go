@@ -20,15 +20,25 @@ import (
 
 func main() {
 
-	// The initial url is the first command line argument - default to https://monzo.com if not found.
+	config := struct {
+		url             string
+		length, workers int
+		timeout         int
+	}{}
+
+	flag.StringVar(&config.url, "url", "https://monzo.com", "The start page")
+	flag.IntVar(&config.length, "length", 1000, "Length of the queue")
+	flag.IntVar(&config.workers, "workers", 5, "Number of concurrent workers")
+	flag.IntVar(&config.timeout, "timeout", 10000, "Request timeout in ms")
 	flag.Parse()
-	arg := flag.Arg(0)
-	if arg == "" {
-		arg = "https://monzo.com"
+
+	// If there is an anonymous command line argument, use it as the url
+	if arg := flag.Arg(0); arg != "" {
+		config.url = arg
 	}
 
 	// Make sure we can parse the URL
-	base, err := url.Parse(arg)
+	base, err := url.Parse(config.url)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -54,7 +64,7 @@ func main() {
 
 	// Create a scraper
 	s := &scraper.State{
-		Timeout: time.Second * 10,
+		Timeout: time.Duration(config.timeout) * time.Millisecond,
 		Getter:  &webgetter.Getter{},
 		Parser: &htmlparser.Parser{
 			Include: func(u *url.URL) bool {
@@ -62,7 +72,7 @@ func main() {
 				return u != nil && u.Host == base.Host
 			},
 		},
-		Queuer: &concurrentqueuer.Queuer{Length: 1000, Workers: 5},
+		Queuer: &concurrentqueuer.Queuer{Length: config.length, Workers: config.workers},
 		Logger: &consolelogger.Logger{},
 	}
 
