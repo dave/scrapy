@@ -30,6 +30,11 @@ func TestNormalise(t *testing.T) {
 			expected: "",
 		},
 		{
+			name:     "throw away javascript",
+			url:      "javascript:a",
+			expected: "",
+		},
+		{
 			name:     "throw away binary",
 			url:      "https://a/b.pdf",
 			expected: "",

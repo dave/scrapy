@@ -88,7 +88,7 @@ func (p *Parser) Parse(ctx context.Context, urlPage string, body io.Reader) (url
 func normalise(raw string, page *url.URL) (*url.URL, error) {
 
 	// Let's throw away a common errors
-	if strings.HasPrefix(raw, "tel:") || strings.HasPrefix(raw, "mailto:") {
+	if strings.HasPrefix(raw, "tel:") || strings.HasPrefix(raw, "mailto:") || strings.HasPrefix(raw, "javascript:") {
 		return nil, nil
 	}
 
