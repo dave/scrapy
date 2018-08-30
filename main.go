@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 	arg := flag.Arg(0)
 	if arg == "" {
-		arg = "https://monzo.com/"
+		arg = "https://monzo.com"
 	}
 
 	base, err := url.Parse(arg)
@@ -39,6 +39,8 @@ func main() {
 
 		// Wait for shutdown signal
 		<-stop
+
+		fmt.Print("\r") // clear the "^C" emitted to the console TODO: Is this cross-platform?
 
 		// Call the context cancellation function
 		cancel()

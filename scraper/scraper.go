@@ -29,7 +29,7 @@ func (s *State) Start(ctx context.Context, url string) {
 		defer cancel()
 
 		// Log that the url has started processing
-		s.Logger.Start(url)
+		s.Logger.Starting(url)
 
 		start := time.Now()
 
@@ -65,7 +65,7 @@ func (s *State) Start(ctx context.Context, url string) {
 
 		// Don't continue if the code is not 200
 		if code != 200 {
-			s.Logger.Finish(url, code, time.Now().Sub(start), 0, 0)
+			s.Logger.Finished(url, code, time.Now().Sub(start), 0, 0)
 			return
 		}
 
@@ -87,25 +87,23 @@ func (s *State) Start(ctx context.Context, url string) {
 		}
 
 		// Log the finish event
-		s.Logger.Finish(url, code, time.Now().Sub(start), len(urls), len(errs))
+		s.Logger.Finished(url, code, time.Now().Sub(start), len(urls), len(errs))
 
 		// Queue all the resulting urls
 		for _, u := range urls {
-			switch s.Queuer.Push(u) {
-			case nil:
-				// Log if the push succeeded
-				s.Logger.Queue(u)
-			case queuer.FullError:
-				// If the push failed, only log for FullError (ignore DuplicateError)
-				s.Logger.Full(u)
+			if err := s.Queuer.Push(u); err != nil {
+				s.Logger.Error(u, err)
+				continue
 			}
+			// Log if the push succeeded
+			s.Logger.Queued(u)
 		}
 	})
 
 	if err := s.Queuer.Push(url); err != nil {
 		panic("error in initial queue push")
 	}
-	s.Logger.Queue(url)
+	s.Logger.Queued(url)
 
 	s.Queuer.Wait()
 	s.Logger.Exit()

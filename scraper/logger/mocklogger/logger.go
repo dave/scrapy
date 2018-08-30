@@ -11,22 +11,24 @@ type Logger struct {
 	m   sync.Mutex
 }
 
-func (l *Logger) Full(url string) {
-	l.m.Lock()
-	defer l.m.Unlock()
-	l.Log = append(l.Log, fmt.Sprintf("full %s", url))
-}
+func (l *Logger) Init() {}
 
-func (l *Logger) Queue(url string) {
+func (l *Logger) Queued(url string) {
 	l.m.Lock()
 	defer l.m.Unlock()
 	l.Log = append(l.Log, fmt.Sprintf("queue %s", url))
 }
 
-func (l *Logger) Start(url string) {
+func (l *Logger) Starting(url string) {
 	l.m.Lock()
 	defer l.m.Unlock()
 	l.Log = append(l.Log, fmt.Sprintf("start %s", url))
+}
+
+func (l *Logger) Finished(url string, code int, latency time.Duration, urls, errors int) {
+	l.m.Lock()
+	defer l.m.Unlock()
+	l.Log = append(l.Log, fmt.Sprintf("finish %s: %d, %d, %d", url, code, urls, errors))
 }
 
 func (l *Logger) Error(url string, err error) {
@@ -35,10 +37,4 @@ func (l *Logger) Error(url string, err error) {
 	l.Log = append(l.Log, fmt.Sprintf("error %s: %v", url, err))
 }
 
-func (l *Logger) Finish(url string, code int, latency time.Duration, urls, errors int) {
-	l.m.Lock()
-	defer l.m.Unlock()
-	l.Log = append(l.Log, fmt.Sprintf("finish %s: %d, %d, %d", url, code, urls, errors))
-}
-func (l *Logger) Init() {}
 func (l *Logger) Exit() {}
