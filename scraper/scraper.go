@@ -2,9 +2,7 @@ package scraper
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"strings"
+	"errors"
 	"time"
 
 	"github.com/dave/scrapy/scraper/getter"
@@ -37,45 +35,39 @@ func (s *State) Start(ctx context.Context, url string) {
 		c := s.Getter.Get(ctx, url)
 
 		// Wait for the getter to start streaming the contents, but respect context cancellation
-		var body io.ReadCloser
-		var code int
-		var err error
-		var mime string
+		var r getter.Result
 		select {
 		case <-ctx.Done():
 			s.Logger.Error(url, ctx.Err())
 			return
-		case r := <-c:
-			err = r.Err
-			body = r.Body
-			code = r.Code
-			mime = r.Mime
+		case r = <-c:
+			// great!
 		}
 
 		// Log error
-		if err != nil {
-			s.Logger.Error(url, err)
+		if r.Err != nil {
+			s.Logger.Error(url, r.Err)
 			return
 		}
 
 		// Close body if it is non nil
-		if body != nil {
-			defer body.Close()
+		if r.Body != nil {
+			defer r.Body.Close()
 		}
 
 		// Don't continue if the code is not 200
-		if code != 200 {
-			s.Logger.Finished(url, code, time.Now().Sub(start), 0, 0)
+		if r.Code != 200 {
+			s.Logger.Finished(url, r.Code, time.Now().Sub(start), 0, 0)
 			return
 		}
 
-		if !strings.Contains(mime, "text/html") {
-			s.Logger.Error(url, fmt.Errorf("unsupported mime type: %s", mime))
+		if !r.Html {
+			s.Logger.Error(url, errors.New("contents were not HTML"))
 			return
 		}
 
 		// Parse the body
-		urls, errs := s.Parser.Parse(url, body)
+		urls, errs := s.Parser.Parse(url, r.Body)
 
 		// Perhaps the parser ended early because of cancellation? If so, log the error.
 		select {
@@ -87,7 +79,7 @@ func (s *State) Start(ctx context.Context, url string) {
 		}
 
 		// Log the finish event
-		s.Logger.Finished(url, code, time.Now().Sub(start), len(urls), len(errs))
+		s.Logger.Finished(url, r.Code, time.Now().Sub(start), len(urls), len(errs))
 
 		// Queue all the resulting urls
 		for _, u := range urls {
