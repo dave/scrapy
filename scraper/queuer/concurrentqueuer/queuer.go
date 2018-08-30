@@ -10,19 +10,21 @@ type Queuer struct {
 	Length  int // Max queue length
 	Workers int // Number of concurrent workers
 
-	urls  map[string]bool // Urls that have been processed in the past
-	m     sync.RWMutex    // To protect the urls map
-	once  sync.Once       // For initialisation
-	queue chan string     // The queue
-	wg    *sync.WaitGroup
+	seen        sync.Map       // Tracks the urls that have been pushed in the past
+	queue       chan string    // The queue
+	wg          sync.WaitGroup // Waitgroup tracking progress
+	initialised bool           // Ensures initialisation orderss
 }
 
 func (q *Queuer) Start(action func(url string)) {
-	q.once.Do(func() {
-		q.urls = map[string]bool{}
-		q.queue = make(chan string, q.Length)
-		q.wg = &sync.WaitGroup{}
-	})
+
+	if q.initialised {
+		panic("Start should only be called once")
+	}
+
+	q.initialised = true
+	q.queue = make(chan string, q.Length)
+
 	for i := 0; i < q.Workers; i++ {
 		go func() {
 			for u := range q.queue {
@@ -35,11 +37,11 @@ func (q *Queuer) Start(action func(url string)) {
 
 func (q *Queuer) Push(url string) error {
 
-	if q.urls == nil {
+	if !q.initialised {
 		panic("Start must be called before Push")
 	}
 
-	if !q.needsProcessing(url) {
+	if _, loaded := q.seen.LoadOrStore(url, true); loaded {
 		return queuer.DuplicateError
 	}
 
@@ -57,28 +59,4 @@ func (q *Queuer) Push(url string) error {
 
 func (q *Queuer) Wait() {
 	q.wg.Wait()
-}
-
-func (q *Queuer) needsProcessing(url string) bool {
-
-	// First do a RLock
-	q.m.RLock()
-	if q.urls[url] {
-		q.m.RUnlock()
-		return false
-	}
-	q.m.RUnlock()
-
-	// If url wasn't found, do a Lock
-	q.m.Lock()
-	defer q.m.Unlock()
-
-	// We need to check again after the Lock
-	if q.urls[url] {
-		return false
-	}
-
-	// Finally set the url
-	q.urls[url] = true
-	return true
 }
