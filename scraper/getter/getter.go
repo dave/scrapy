@@ -1,3 +1,4 @@
+// Package getter defines an interface that is used to request results by URL
 package getter
 
 import (
@@ -5,13 +6,15 @@ import (
 	"io"
 )
 
+// Interface is used to request results by URL
 type Interface interface {
-	Get(ctx context.Context, url string) chan Result
+	Get(ctx context.Context, url string) chan Result // Get returns a channel. Later it sends the response, and closes the channel.
 }
 
+// Interface is used to request results by URL
 type Result struct {
-	Code int
-	Body io.ReadCloser
-	Err  error
-	Mime string
+	Code int           // The http status code
+	Body io.ReadCloser // The body
+	Mime string        // The raw contents of the content-type header
+	Err  error         // Any error (all other fields will be zero if Err != nil)
 }
