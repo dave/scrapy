@@ -109,7 +109,7 @@ func TestGetter(t *testing.T) {
 }
 
 func server(returnAfter, code int, body string) *httptest.Server {
-	httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if returnAfter > 0 {
 			<-time.After(time.Duration(returnAfter) * time.Millisecond)
 		}
