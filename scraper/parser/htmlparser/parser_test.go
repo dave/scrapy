@@ -2,6 +2,7 @@ package htmlparser
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"net/url"
 	"reflect"
@@ -131,7 +132,7 @@ func TestParser(t *testing.T) {
 
 			body := ioutil.NopCloser(bytes.NewBufferString(test.body))
 
-			urls, errs := p.Parse("", body)
+			urls, errs := p.Parse(context.Background(), "", body)
 
 			if !reflect.DeepEqual(urls, test.urls) {
 				t.Errorf("unexpected urls - got: %#v, expected: %#v", urls, test.urls)
