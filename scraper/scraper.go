@@ -91,16 +91,21 @@ func (s *State) Start(ctx context.Context, url string) {
 
 		// Queue all the resulting urls
 		for _, u := range urls {
-			if added, err := s.Queuer.Push(u); err != nil {
-				s.Logger.Full(u)
-			} else if added {
+			switch s.Queuer.Push(u) {
+			case nil:
+				// Log if the push succeeded
 				s.Logger.Queue(u)
+			case queuer.FullError:
+				// If the push failed, only log for FullError (ignore DuplicateError)
+				s.Logger.Full(u)
 			}
 		}
 	})
 
-	s.Queuer.Push(url)
-	s.Logger.Queue(url) // no need to check error for initial push
+	if err := s.Queuer.Push(url); err != nil {
+		panic("error in initial queue push")
+	}
+	s.Logger.Queue(url)
 
 	s.Queuer.Wait()
 	s.Logger.Exit()

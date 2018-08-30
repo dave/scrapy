@@ -3,6 +3,8 @@ package mockqueuer
 import (
 	"context"
 	"sync"
+
+	"github.com/dave/scrapy/scraper/queuer"
 )
 
 // Mock queuer executes the action as soon as the url is pushed
@@ -22,16 +24,16 @@ func (q *Queuer) Start(action func(url string)) {
 	q.action = action
 }
 
-func (q *Queuer) Push(url string) (bool, error) {
+func (q *Queuer) Push(url string) error {
 	if q.urls == nil {
 		panic("Start must be called before Push")
 	}
 	if q.urls[url] {
-		return false, nil
+		return queuer.DuplicateError
 	}
 	q.urls[url] = true
 	q.action(url)
-	return true, nil
+	return nil
 }
 
 func (*Queuer) Wait() {

@@ -1,8 +1,9 @@
 package concurrentqueuer
 
 import (
-	"fmt"
 	"sync"
+
+	"github.com/dave/scrapy/scraper/queuer"
 )
 
 type Queuer struct {
@@ -32,24 +33,24 @@ func (q *Queuer) Start(action func(url string)) {
 	}
 }
 
-func (q *Queuer) Push(url string) (bool, error) {
+func (q *Queuer) Push(url string) error {
 
 	if q.urls == nil {
 		panic("Start must be called before Push")
 	}
 
 	if !q.needsProcessing(url) {
-		return false, nil
+		return queuer.DuplicateError
 	}
 
 	select {
 	case q.queue <- url:
 		// Url was added to the queue
 		q.wg.Add(1)
-		return true, nil
+		return nil
 	default:
 		// queue was full - don't want to wait here...
-		return false, fmt.Errorf("queue was full - could not add %s", url)
+		return queuer.FullError
 	}
 
 }
