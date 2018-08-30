@@ -4,7 +4,6 @@ package webgetter
 import (
 	"context"
 	"net/http"
-
 	"strings"
 
 	"github.com/dave/scrapy/scraper/getter"
