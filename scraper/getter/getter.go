@@ -14,7 +14,7 @@ type Interface interface {
 // Interface is used to request results by URL
 type Result struct {
 	Code int           // The http status code
-	Body io.ReadCloser // The body
-	Html bool          // The content-type header indicates HTML
+	Body io.ReadCloser // The body - remember the caller of Get is responsible for closing this.
+	Html bool          // Did the content-type header indicates HTML?
 	Err  error         // Any error (all other fields will be zero if Err != nil)
 }
