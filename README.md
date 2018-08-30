@@ -19,6 +19,9 @@ scrapy [url]
 The `scrapy` command will get get the page at `url`, parse it for links and get all pages that are 
 on the same domain.
 
+Some stats will be outputted during the processing, and a list of URLs will be printed when it's 
+finished. You can end the job early with Ctrl+C.
+
 ### Flags
 
 Several command line flags are available:
