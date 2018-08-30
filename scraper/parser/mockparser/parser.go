@@ -2,6 +2,7 @@
 package mockparser
 
 import (
+	"context"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -19,7 +20,7 @@ type Dummy struct {
 }
 
 // Parse returns the dummy data if Results contains a matching record.
-func (p *Parser) Parse(url string, body io.Reader) (urls []string, errs []error) {
+func (p *Parser) Parse(ctx context.Context, url string, body io.Reader) (urls []string, errs []error) {
 	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return nil, []error{err}

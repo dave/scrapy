@@ -2,6 +2,7 @@
 package htmlparser
 
 import (
+	"context"
 	"io"
 	"net/url"
 	"path"
@@ -16,7 +17,7 @@ type Parser struct {
 }
 
 // Parse parses the document and returns the urls and parse errors
-func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []error) {
+func (p *Parser) Parse(ctx context.Context, urlPage string, body io.Reader) (urls []string, errs []error) {
 	t := html.NewTokenizer(body)
 
 	page, err := url.Parse(urlPage)
@@ -25,6 +26,12 @@ func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []er
 	}
 
 	for {
+		select {
+		case <-ctx.Done():
+			return nil, []error{ctx.Err()}
+		default:
+			// great!
+		}
 		typ := t.Next()
 		switch typ {
 		case html.ErrorToken:

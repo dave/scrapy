@@ -81,7 +81,7 @@ func (s *State) Start(ctx context.Context, url string) {
 		}
 
 		// Parse the body
-		urls, errs := s.Parser.Parse(url, r.Body)
+		urls, errs := s.Parser.Parse(ctx, url, r.Body)
 
 		// Perhaps the parser ended early because of cancellation? If so, log the error.
 		select {
