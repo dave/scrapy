@@ -42,13 +42,15 @@ func (h *Getter) Get(ctx context.Context, url string) chan getter.Result {
 			return
 		}
 
-		// Wait for latency but respect cancellation
-		select {
-		case <-time.After(result.Latency):
-			// great!
-		case <-ctx.Done():
-			out <- getter.Result{Err: ctx.Err()}
-			return
+		if result.Latency > 0 {
+			// Wait for latency but respect cancellation
+			select {
+			case <-time.After(result.Latency):
+				// great!
+			case <-ctx.Done():
+				out <- getter.Result{Err: ctx.Err()}
+				return
+			}
 		}
 
 		// Return an error if required
