@@ -47,15 +47,7 @@ func TestGetter(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if test.returnAfter > 0 {
-					<-time.After(time.Duration(test.returnAfter) * time.Millisecond)
-				}
-				if test.code != 0 && test.code != 200 {
-					w.WriteHeader(test.code)
-				}
-				fmt.Fprint(w, test.body)
-			}))
+			ts := server(test.returnAfter, test.code, test.body)
 			defer ts.Close()
 
 			g := &Getter{}
@@ -114,4 +106,16 @@ func TestGetter(t *testing.T) {
 			}
 		})
 	}
+}
+
+func server(returnAfter, code int, body string) *httptest.Server {
+	httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if returnAfter > 0 {
+			<-time.After(time.Duration(returnAfter) * time.Millisecond)
+		}
+		if code != 0 && code != 200 {
+			w.WriteHeader(code)
+		}
+		fmt.Fprint(w, body)
+	}))
 }
