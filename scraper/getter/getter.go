@@ -15,6 +15,6 @@ type Interface interface {
 type Result struct {
 	Code int           // The http status code
 	Body io.ReadCloser // The body
-	Mime string        // The raw contents of the content-type header
+	Html bool          // The content-type header indicates HTML
 	Err  error         // Any error (all other fields will be zero if Err != nil)
 }

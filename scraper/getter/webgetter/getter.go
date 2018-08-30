@@ -5,6 +5,8 @@ import (
 	"context"
 	"net/http"
 
+	"strings"
+
 	"github.com/dave/scrapy/scraper/getter"
 )
 
@@ -45,7 +47,7 @@ func (h *Getter) Get(ctx context.Context, url string) chan getter.Result {
 				return
 			}
 			// Send the result on the channel - remember the caller of Get is responsible for closing Body.
-			out <- getter.Result{Code: response.StatusCode, Body: response.Body, Mime: response.Header.Get("content-type")}
+			out <- getter.Result{Code: response.StatusCode, Body: response.Body, Html: strings.Contains(response.Header.Get("content-type"), "text/html")}
 			return
 		}
 	}()
