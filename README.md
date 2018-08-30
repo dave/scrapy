@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/dave/scrapy.svg?branch=master)](https://travis-ci.org/dave/scrapy) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/dave/scrapy)](https://goreportcard.com/report/github.com/dave/scrapy) 
+[![codecov](https://codecov.io/gh/dave/scrapy/branch/master/graph/badge.svg)](https://codecov.io/gh/dave/scrapy)
+
 # Web scraper brainstorming
 
 ### Features
