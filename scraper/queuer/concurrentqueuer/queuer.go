@@ -1,3 +1,4 @@
+// Package concurrentqueuer defines a queuer.Interface that runs several workers concurrently on a queue
 package concurrentqueuer
 
 import (
@@ -6,24 +7,20 @@ import (
 	"github.com/dave/scrapy/scraper/queuer"
 )
 
+// Queuer is a queuer.Interface that runs several workers concurrently on a queue.
 type Queuer struct {
-	Length  int // Max queue length
-	Workers int // Number of concurrent workers
-
+	Length                int            // Max queue length
+	Workers               int            // Number of concurrent workers
 	seen                  sync.Map       // Tracks the items that have been pushed in the past
 	queue                 chan string    // The queue of items waiting to process
 	queueWait, workerWait sync.WaitGroup // Waitgroup tracking queue and workers
-	initialised           bool           // Ensures initialisation order
+	once                  sync.Once      // For initialisation
 }
 
+// Start starts processing the queue.
 func (q *Queuer) Start(action func(string)) {
 
-	if q.initialised {
-		panic("Start should only be called once")
-	}
-
-	q.initialised = true
-	q.queue = make(chan string, q.Length)
+	q.ensureInitialised()
 
 	for i := 0; i < q.Workers; i++ {
 		go func() {
@@ -41,11 +38,10 @@ func (q *Queuer) Start(action func(string)) {
 	}
 }
 
+// Push attempts to add an item to the queue. On failure, returns queuer.DuplicateError or queuer.FullError.
 func (q *Queuer) Push(payload string) error {
 
-	if !q.initialised {
-		panic("Start must be called before Push")
-	}
+	q.ensureInitialised()
 
 	if _, loaded := q.seen.LoadOrStore(payload, true); loaded {
 		return queuer.DuplicateError
@@ -63,8 +59,16 @@ func (q *Queuer) Push(payload string) error {
 
 }
 
+// Wait waits for all items to be processed before returning.
 func (q *Queuer) Wait() {
 	q.queueWait.Wait()  // wait for the queue to finish
 	close(q.queue)      // close the queue channel so workers will start to exit
 	q.workerWait.Wait() // wait for all workers to finish exiting
+}
+
+// initialises the queue
+func (q *Queuer) ensureInitialised() {
+	q.once.Do(func() {
+		q.queue = make(chan string, q.Length)
+	})
 }

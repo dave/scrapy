@@ -1,3 +1,4 @@
+// Package mockparser defines a parser.Interface that returns dummy urls for a given input, and is used in tests
 package mockparser
 
 import (
@@ -6,15 +7,18 @@ import (
 	"io/ioutil"
 )
 
+// Parser is a parser.Interface that returns dummy urls for a given input, and is used in tests
 type Parser struct {
-	Results map[string]Dummy
+	Results map[string]Dummy // The results to return: body -> result
 }
 
+// Dummy responses
 type Dummy struct {
-	Urls []string
-	Errs []string
+	Urls []string // List of urls
+	Errs []string // List of parse errors as strings
 }
 
+// Parse returns the dummy data if Results contains a matching record.
 func (p *Parser) Parse(url string, body io.Reader) (urls []string, errs []error) {
 	b, err := ioutil.ReadAll(body)
 	if err != nil {

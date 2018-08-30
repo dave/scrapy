@@ -1,3 +1,4 @@
+// Package scraper implements a web scraper as a library
 package scraper
 
 import (
@@ -11,16 +12,29 @@ import (
 	"github.com/dave/scrapy/scraper/queuer"
 )
 
+// State implements a web scraper
 type State struct {
-	Timeout time.Duration
-	Getter  getter.Interface
-	Parser  parser.Interface
-	Queuer  queuer.Interface
-	Logger  logger.Interface
+	Timeout time.Duration    // Timeout for each individual item
+	Getter  getter.Interface // Getter gets the page
+	Parser  parser.Interface // Parser parses links
+	Queuer  queuer.Interface // Queuer queues new items and starts queued items
+	Logger  logger.Interface // Logger logs the results
 }
 
+// Start starts the scraping with a base url. Cancel the context to end early.
 func (s *State) Start(ctx context.Context, url string) {
+
+	// Initialise the logger
 	s.Logger.Init()
+
+	// Push the initial url onto the queue
+	if err := s.Queuer.Push(url); err != nil {
+		panic("error in initial queue push")
+	}
+	// Log that the url was queued correctly
+	s.Logger.Queued(url)
+
+	// Start the queue processing
 	s.Queuer.Start(func(url string) {
 
 		ctx, cancel := context.WithTimeout(ctx, s.Timeout)
@@ -92,11 +106,9 @@ func (s *State) Start(ctx context.Context, url string) {
 		}
 	})
 
-	if err := s.Queuer.Push(url); err != nil {
-		panic("error in initial queue push")
-	}
-	s.Logger.Queued(url)
-
+	// Wait for the queue to finish processing
 	s.Queuer.Wait()
+
+	// Signal to the logger that we're exiting
 	s.Logger.Exit()
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/dave/scrapy/scraper/getter"
 )
 
-func TestGetter1(t *testing.T) {
+func TestGetter(t *testing.T) {
 	tests := []struct {
 		name        string
 		body        string

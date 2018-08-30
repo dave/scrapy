@@ -7,9 +7,11 @@ import (
 	"time"
 )
 
-// TODO: Quick test for mock getter - perhaps improve if have time.
-
+// A quick test for mock getter
 func TestGetter(t *testing.T) {
+
+	// TODO: perhaps improve if have time.
+
 	g := &Getter{
 		Results: map[string]Dummy{
 			"a": {

@@ -1,3 +1,4 @@
+// Package htmlparser defines a parser.Interface that parses HTML and returns the urls from anchor href attributes
 package htmlparser
 
 import (
@@ -9,10 +10,12 @@ import (
 	"golang.org/x/net/html"
 )
 
+// Parser is a parser.Interface that parses HTML and returns the urls from anchor href attributes
 type Parser struct {
 	Include func(*url.URL) bool
 }
 
+// Parse parses the document and returns the urls and parse errors
 func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []error) {
 	t := html.NewTokenizer(body)
 
@@ -74,6 +77,7 @@ func (p *Parser) Parse(urlPage string, body io.Reader) (urls []string, errs []er
 	}
 }
 
+// normalise performs modifications on a url in order to reduce duplicates and errors
 func normalise(raw string, page *url.URL) (*url.URL, error) {
 
 	// Let's throw away a common errors
