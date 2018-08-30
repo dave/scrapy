@@ -73,7 +73,7 @@ func TestQueuer_concurrent(t *testing.T) {
 
 }
 
-// TestQueuer tests that the queueing system works correctly and FullError, DuplicateErrors are returned correctly
+// TestQueuer tests that the queueing system works correctly and ErrFull, ErrDuplicate are returned correctly
 func TestQueuer_queue(t *testing.T) {
 	q := &Queuer{Length: 1, Workers: 1}
 
@@ -108,8 +108,8 @@ func TestQueuer_queue(t *testing.T) {
 	}
 
 	// Pushing another item should fail with a full queue
-	if err := q.Push("c"); err != queuer.FullError {
-		t.Errorf("c should fail with FullError, this failed with %v", err)
+	if err := q.Push("c"); err != queuer.ErrFull {
+		t.Errorf("c should fail with ErrFull, this failed with %v", err)
 	}
 
 	// Finally we let a finish by closing aSignal
@@ -120,15 +120,15 @@ func TestQueuer_queue(t *testing.T) {
 		t.Errorf("timed out waiting for b to start processing")
 	}
 
-	// Now if we re-push any of the three items we should get DuplicateError
-	if err := q.Push("a"); err != queuer.DuplicateError {
-		t.Errorf("a should now fail with DuplicateError, this failed with %v", err)
+	// Now if we re-push any of the three items we should get ErrDuplicate
+	if err := q.Push("a"); err != queuer.ErrDuplicate {
+		t.Errorf("a should now fail with ErrDuplicate, this failed with %v", err)
 	}
-	if err := q.Push("b"); err != queuer.DuplicateError {
-		t.Errorf("b should now fail with DuplicateError, this failed with %v", err)
+	if err := q.Push("b"); err != queuer.ErrDuplicate {
+		t.Errorf("b should now fail with ErrDuplicate, this failed with %v", err)
 	}
-	if err := q.Push("c"); err != queuer.DuplicateError {
-		t.Errorf("c should now fail with DuplicateError, this failed with %v", err)
+	if err := q.Push("c"); err != queuer.ErrDuplicate {
+		t.Errorf("c should now fail with ErrDuplicate, this failed with %v", err)
 	}
 
 	// Tidy up

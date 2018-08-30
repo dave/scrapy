@@ -71,7 +71,7 @@ func (h *Getter) Get(ctx context.Context, url string) chan getter.Result {
 		out <- getter.Result{
 			Code: code,
 			Body: ioutil.NopCloser(bytes.NewBufferString(result.Body)),
-			Html: true,
+			HTML: true,
 		}
 	}()
 	return out

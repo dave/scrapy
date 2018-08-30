@@ -75,7 +75,7 @@ func (s *State) Start(ctx context.Context, url string) {
 			return
 		}
 
-		if !r.Html {
+		if !r.HTML {
 			s.Logger.Error(url, errors.New("contents were not HTML"))
 			return
 		}

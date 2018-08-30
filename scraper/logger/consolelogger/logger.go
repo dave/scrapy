@@ -20,7 +20,7 @@ import (
 type Logger struct {
 	Writer                               io.Writer             // where to print the logs
 	successfulUrls                       []string              // all successful urls (will be sorted and listed at exit)
-	lastUrlStarted                       string                // last url that started processing
+	lastURLStarted                       string                // last url that started processing
 	lastErr                              error                 // last error received
 	queued, started, errs, success, full uint64                // counters for various stats
 	ticker                               *time.Ticker          // ticker ticks every 200ms to display stats
@@ -40,7 +40,7 @@ func (l *Logger) printSummary() {
 
 	w := tabwriter.NewWriter(l.Writer, 4, 3, 3, ' ', 0)
 	fmt.Fprintf(w, "Queued\t%d\n", stats.inQueue)
-	fmt.Fprintf(w, "In progress\t%d\t%s\n", stats.inProgress, l.getLastUrlStarted())
+	fmt.Fprintf(w, "In progress\t%d\t%s\n", stats.inProgress, l.getLastURLStarted())
 	fmt.Fprintf(w, "Success\t%d\n", stats.success)
 	fmt.Fprintf(w, "Errors\t%d\t%s\n", stats.allErrors, l.getLastErr())
 	w.Flush()
@@ -87,7 +87,7 @@ func (l *Logger) Queued(url string) {
 // Starting is called each time a url starts processing
 func (l *Logger) Starting(url string) {
 	atomic.AddUint64(&l.started, 1)
-	l.setLastUrlStarted(url)
+	l.setLastURLStarted(url)
 }
 
 // Finished is called each time a URL successfully finishes processing (even for non-200 results)
@@ -104,7 +104,7 @@ func (l *Logger) Finished(url string, code int, latency time.Duration, urls, err
 	}
 
 	atomic.AddUint64(&l.success, 1)
-	l.addUrlSuccess(url)
+	l.addURLSuccess(url)
 }
 
 // Error is called on every error
@@ -113,9 +113,9 @@ func (l *Logger) Error(url string, err error) {
 	// TODO: add latency here and log to the histogram
 
 	switch err {
-	case queuer.DuplicateError:
+	case queuer.ErrDuplicate:
 		// ignore duplicate errors
-	case queuer.FullError:
+	case queuer.ErrFull:
 		atomic.AddUint64(&l.full, 1)
 		l.setLastErr(err)
 	default:
@@ -167,19 +167,19 @@ func (l *Logger) setLastErr(err error) {
 	l.lastErr = err
 }
 
-func (l *Logger) getLastUrlStarted() string {
+func (l *Logger) getLastURLStarted() string {
 	l.m.Lock()
 	defer l.m.Unlock()
-	return l.lastUrlStarted
+	return l.lastURLStarted
 }
 
-func (l *Logger) setLastUrlStarted(u string) {
+func (l *Logger) setLastURLStarted(u string) {
 	l.m.Lock()
 	defer l.m.Unlock()
-	l.lastUrlStarted = u
+	l.lastURLStarted = u
 }
 
-func (l *Logger) addUrlSuccess(url string) {
+func (l *Logger) addURLSuccess(url string) {
 	l.m.Lock()
 	defer l.m.Unlock()
 	l.successfulUrls = append(l.successfulUrls, url)
@@ -205,6 +205,7 @@ func (l *Logger) loadDisplayStats() displayStats {
 	}
 }
 
+// ClearScreen is the control code to clear the screen
 const ClearScreen = "\033[H\033[2J"
 
 /*

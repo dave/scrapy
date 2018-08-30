@@ -19,7 +19,7 @@ func TestGetter(t *testing.T) {
 		body        string
 		code        int
 		err         string
-		overrideUrl string
+		overrideURL string
 		returnAfter int
 		cancelAfter int
 	}{
@@ -30,7 +30,7 @@ func TestGetter(t *testing.T) {
 		},
 		{
 			name:        "broken url",
-			overrideUrl: "a",
+			overrideURL: "a",
 			err:         "unsupported protocol scheme",
 		},
 		{
@@ -68,8 +68,8 @@ func TestGetter(t *testing.T) {
 			}
 
 			url := ts.URL
-			if test.overrideUrl != "" {
-				url = test.overrideUrl
+			if test.overrideURL != "" {
+				url = test.overrideURL
 			}
 
 			c := g.Get(ctx, url)

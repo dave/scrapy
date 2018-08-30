@@ -13,7 +13,7 @@ type Logger struct {
 	m   sync.Mutex
 }
 
-// Initialise the logger
+// Init initialises the logger
 func (l *Logger) Init() {}
 
 // Queued is called each time a url is successfully queued

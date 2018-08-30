@@ -38,13 +38,13 @@ func (q *Queuer) Start(action func(string)) {
 	}
 }
 
-// Push attempts to add an item to the queue. On failure, returns queuer.DuplicateError or queuer.FullError.
+// Push attempts to add an item to the queue. On failure, returns queuer.ErrDuplicate or queuer.ErrFull.
 func (q *Queuer) Push(payload string) error {
 
 	q.ensureInitialised()
 
 	if _, loaded := q.seen.LoadOrStore(payload, true); loaded {
-		return queuer.DuplicateError
+		return queuer.ErrDuplicate
 	}
 
 	select {
@@ -54,7 +54,7 @@ func (q *Queuer) Push(payload string) error {
 		return nil
 	default:
 		// queue was full - don't want to wait here...
-		return queuer.FullError
+		return queuer.ErrFull
 	}
 
 }
