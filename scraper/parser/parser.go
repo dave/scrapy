@@ -1,3 +1,4 @@
+// Package parser defines an interface used to parse HTML and extract links
 package parser
 
 import (

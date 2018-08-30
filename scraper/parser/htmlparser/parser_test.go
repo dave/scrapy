@@ -6,8 +6,85 @@ import (
 	"net/url"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 )
+
+func TestNormalise(t *testing.T) {
+	tests := []struct {
+		name, url, page, expected, err string
+	}{
+		{
+			name:     "simple",
+			url:      "https://a",
+			expected: "https://a",
+		},
+		{
+			name:     "throw away tel",
+			url:      "tel:0",
+			expected: "",
+		},
+		{
+			name:     "throw away mailto",
+			url:      "mailto:a@a",
+			expected: "",
+		},
+		{
+			name:     "throw away binary",
+			url:      "https://a/b.pdf",
+			expected: "",
+		},
+		{
+			name: "parse error",
+			url:  ":",
+			err:  "missing protocol scheme",
+		},
+		{
+			name:     "copy scheme and host from page if missing",
+			url:      "/d",
+			page:     "https://a/b/c",
+			expected: "https://a/d",
+		},
+		{
+			name:     "relative path",
+			url:      "./../../e",
+			page:     "https://a/b/c/d",
+			expected: "https://a/b/e",
+		},
+		{
+			name:     "remove trailing slash",
+			url:      "https://a/b/",
+			expected: "https://a/b",
+		},
+		{
+			name:     "prevent jumping from https to http",
+			url:      "http://a/b",
+			page:     "https://a",
+			expected: "https://a/b",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			page, err := url.Parse(test.page)
+			if err != nil {
+				t.Fatal("parsing page url failed")
+			}
+			out, err := normalise(test.url, page)
+			if test.err == "" && err != nil {
+				t.Errorf("expected no error but got %v", err)
+			}
+			if test.err != "" && !strings.Contains(err.Error(), test.err) {
+				t.Errorf("expected error %s but got %v", test.err, err)
+			}
+			if test.expected == "" && out != nil {
+				t.Errorf("expected nil url, but got %s", out.String())
+			}
+			if test.expected != "" && (out == nil || out.String() != test.expected) {
+				t.Errorf("expected %s, but got %v", test.expected, out)
+			}
+		})
+	}
+}
 
 var tests = map[string]testSpec{
 	"simple": {
