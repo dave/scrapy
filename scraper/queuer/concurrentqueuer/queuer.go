@@ -30,8 +30,8 @@ func (q *Queuer) Start(action func(string)) {
 			defer q.workerWait.Done()
 
 			// Read from the queue channel and perform the action on each item
-			for u := range q.queue {
-				action(u)
+			for item := range q.queue {
+				action(item)
 				q.queueWait.Done()
 			}
 		}()
@@ -39,16 +39,16 @@ func (q *Queuer) Start(action func(string)) {
 }
 
 // Push attempts to add an item to the queue. On failure, returns queuer.ErrDuplicate or queuer.ErrFull.
-func (q *Queuer) Push(payload string) error {
+func (q *Queuer) Push(item string) error {
 
 	q.ensureInitialised()
 
-	if _, loaded := q.seen.LoadOrStore(payload, true); loaded {
+	if _, loaded := q.seen.LoadOrStore(item, true); loaded {
 		return queuer.ErrDuplicate
 	}
 
 	select {
-	case q.queue <- payload:
+	case q.queue <- item:
 		// Url was added to the queue
 		q.queueWait.Add(1)
 		return nil
